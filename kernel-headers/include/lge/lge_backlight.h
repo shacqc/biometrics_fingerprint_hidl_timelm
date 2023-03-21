@@ -1,17 +1,8 @@
 #pragma once
 
 #include <sys/ioctl.h>
-
-enum fp_lhbm_state {
- LGE_FP_LHBM_OFF = 0,
- LGE_FP_LHBM_ON,
- LGE_FP_LHBM_READY,
- LGE_FP_LHBM_EXIT,
- LGE_FP_LHBM_SM_OFF = 10,
- LGE_FP_LHBM_SM_ON,
- LGE_FP_LHBM_FORCED_OFF = 20,
- LGE_FP_LHBM_FORCED_ON,
- LGE_FP_LHBM_FORCED_READY,
- LGE_FP_LHBM_FORCED_EXIT,
- LGE_FP_LHBM_STATE_MAX,
-};
+// File descriptor is an attribute file which takes ASCII char as input. Tested with echo command so newline character is included.
+const char  LGE_FP_LHBM_OFF = '0';
+const char  LGE_FP_LHBM_ON = '1';
+const char  LGE_FP_LHBM_READY = '2';
+const char  LGE_FP_LHBM_EXIT = '3';

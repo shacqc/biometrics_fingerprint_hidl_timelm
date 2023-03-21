@@ -18,8 +18,8 @@
 
 #include <android-base/properties.h>
 #include <android/hardware/biometrics/fingerprint/2.1/types.h>
-#include <android/hardware/biometrics/fingerprint/2.1/IBiometricsFingerprintClientCallback.h>
-#include <android/hardware/biometrics/fingerprint/2.1/IBiometricsFingerprint.h>
+#include <android/hardware/biometrics/fingerprint/2.2/IBiometricsFingerprintClientCallback.h>
+#include <android/hardware/biometrics/fingerprint/2.3/IBiometricsFingerprint.h>
 #include <android/log.h>
 #include <hidl/MQDescriptor.h>
 #include <hidl/Status.h>
@@ -33,7 +33,7 @@ namespace android {
 namespace hardware {
 namespace biometrics {
 namespace fingerprint {
-namespace V2_2 {
+namespace V2_3 {
 namespace implementation {
 
 using ::android::sp;
@@ -43,9 +43,9 @@ using ::android::hardware::Return;
 using ::android::hardware::Void;
 using ::android::hardware::biometrics::fingerprint::V2_1::FingerprintError;
 using ::android::hardware::biometrics::fingerprint::V2_1::RequestStatus;
-using ::android::hardware::biometrics::fingerprint::V2_1::FingerprintAcquiredInfo;
-using ::android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprintClientCallback;
-using ::android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint;
+using ::android::hardware::biometrics::fingerprint::V2_2::FingerprintAcquiredInfo;
+using ::android::hardware::biometrics::fingerprint::V2_2::IBiometricsFingerprintClientCallback;
+using ::android::hardware::biometrics::fingerprint::V2_3::IBiometricsFingerprint;
 
 using ILgeBiometricsFingerprint =
         vendor::lge::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint;
@@ -61,52 +61,52 @@ class BiometricsFingerprint : public IBiometricsFingerprint,
     // Methods from ::android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint
     // follow.
     Return<uint64_t> setNotify(
-            const sp<V2_1::IBiometricsFingerprintClientCallback>& clientCallback) ;
-    Return<uint64_t> preEnroll() ;
+            const sp<V2_1::IBiometricsFingerprintClientCallback>& clientCallback) override;
+    Return<uint64_t> preEnroll() override;
     Return<RequestStatus> enroll(const hidl_array<uint8_t, 69>& hat, uint32_t gid,
-                                 uint32_t timeoutSec) ;
-    Return<RequestStatus> postEnroll() ;
-    Return<uint64_t> getAuthenticatorId() ;
-    Return<RequestStatus> cancel() ;
-    Return<RequestStatus> enumerate() ;
-    Return<RequestStatus> remove(uint32_t gid, uint32_t fid) ;
-    Return<RequestStatus> setActiveGroup(uint32_t gid, const hidl_string& storePath) ;
-    Return<RequestStatus> authenticate(uint64_t operationId, uint32_t gid) ;
+                                 uint32_t timeoutSec) override;
+    Return<RequestStatus> postEnroll() override;
+    Return<uint64_t> getAuthenticatorId() override;
+    Return<RequestStatus> cancel() override;
+    Return<RequestStatus> enumerate() override;
+    Return<RequestStatus> remove(uint32_t gid, uint32_t fid) override;
+    Return<RequestStatus> setActiveGroup(uint32_t gid, const hidl_string& storePath) override;
+    Return<RequestStatus> authenticate(uint64_t operationId, uint32_t gid) override;
 
-    // Methods from ::android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint
+    // Methods from ::android::hardware::biometrics::fingerprint::V2_3::IBiometricsFingerprint
     // follow.
-    Return<bool> isUdfps(uint32_t sensorID) ;
-    Return<void> onFingerDown(uint32_t x, uint32_t y, float minor, float major) ;
-    Return<void> onFingerUp() ;
+    Return<bool> isUdfps(uint32_t sensorID) override;
+    Return<void> onFingerDown(uint32_t x, uint32_t y, float minor, float major) override;
+    Return<void> onFingerUp() override;
 
     // Methods from
     // ::android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprintClientCallback
     // follow.
     Return<void> onEnrollResult(uint64_t deviceId, uint32_t fingerId, uint32_t groupId,
-                                uint32_t remaining) ;
+                                uint32_t remaining) override;
     Return<void> onAcquired(uint64_t deviceId, V2_1::FingerprintAcquiredInfo acquiredInfo,
-                            int32_t vendorCode) ;
+                            int32_t vendorCode) override;
     Return<void> onAuthenticated(uint64_t deviceId, uint32_t fingerId, uint32_t groupId,
-                                 const hidl_vec<uint8_t>& token) ;
-    Return<void> onError(uint64_t deviceId, FingerprintError error, int32_t vendorCode) ;
+                                 const hidl_vec<uint8_t>& token) override;
+    Return<void> onError(uint64_t deviceId, FingerprintError error, int32_t vendorCode) override;
     Return<void> onRemoved(uint64_t deviceId, uint32_t fingerId, uint32_t groupId,
-                           uint32_t remaining) ;
+                           uint32_t remaining) override;
     Return<void> onEnumerate(uint64_t deviceId, uint32_t fingerId, uint32_t groupId,
-                             uint32_t remaining) ;
+                             uint32_t remaining) override;
 
     // Methods from
-    // ::android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprintClientCallback
+    // ::android::hardware::biometrics::fingerprint::V2_2::IBiometricsFingerprintClientCallback
     // follow.
-    Return<void> onAcquired_2_1(uint64_t deviceId, FingerprintAcquiredInfo acquiredInfo,
-                                int32_t vendorCode) ;
+    Return<void> onAcquired_2_2(uint64_t deviceId, FingerprintAcquiredInfo acquiredInfo,
+                                int32_t vendorCode) override;
 
     // Methods from
     // ::vendor::lge::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprintClientCallbackEx
     // follow.
     Return<void> onEngineeringInfoUpdated(uint32_t lenth, const hidl_vec<uint32_t>& keys,
-                                          const hidl_vec<hidl_string>& values) ;
+                                          const hidl_vec<hidl_string>& values) override;
     Return<void> onFingerprintCmd(int32_t cmdId, const hidl_vec<uint32_t>& result,
-                                  uint32_t resultLen) ;
+                                  uint32_t resultLen) override;
 
   private:
     bool isUdfps() {
@@ -116,28 +116,27 @@ class BiometricsFingerprint : public IBiometricsFingerprint,
     }
 
     bool setDimlayerHbm(unsigned int value) {
-        return isUdfps() && ioctl(BacklightFd, LGE_FP_LHBM_ON, &value) == 0;
-    }
-
-    bool initFp(unsigned int value) {
-
-        return isUdfps() && fps_power(FPS_Fd, 1) && fps_init(FPS_Fd) == 0;
+       return isUdfps() && write(mBacklightFd, &value, sizeof(value)) == 0;
     }
 
     bool setFpPress(unsigned int value) {
-
-        return isUdfps() && fps_get_data(int Fd) == 0;
+      if(value == 1){
+      return isUdfps() && ioctl(mScannerFd, FP_POWER_ONOFF,  &value) && ioctl(mScannerFd, INT_TRIGGER_INIT, 3) == 0;
+    }
+    else {
+      return isUdfps() && ioctl(mScannerFd, FP_POWER_ONOFF, &value) && ioctl(mScannerFd, INT_TRIGGER_CLOSE, 1) == 0;
+    }
     }
 
     sp<ILgeBiometricsFingerprint> mLgeBiometricsFingerprint;
     sp<V2_1::IBiometricsFingerprintClientCallback> mClientCallback;
 
-    int FPS_Fd;
-    int BacklightFd;
+    int mScannerFd;
+    int mBacklightFd;
 };
 
 }  // namespace implementation
-}  // namespace V2_1
+}  // namespace V2_3
 }  // namespace fingerprint
 }  // namespace biometrics
 }  // namespace hardware

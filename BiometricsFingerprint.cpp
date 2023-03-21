@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.biometrics.fingerprint@2.1-service.lge"
+#define LOG_TAG "android.hardware.biometrics.fingerprint@2.3-service.lge"
 
 #include "BiometricsFingerprint.h"
 
@@ -22,11 +22,11 @@ namespace android {
 namespace hardware {
 namespace biometrics {
 namespace fingerprint {
-namespace V2_2 {
+namespace V2_3 {
 namespace implementation {
 
 BiometricsFingerprint::BiometricsFingerprint()
-    : FPS_Fd(open("/dev/esfp0", O_RDWR)), BacklightFd(open("/sys/devices/virtual/panel/brightness/fp_lhbm",O_WRONLY))  {
+    : mScannerFd(open("/dev/esfp0", O_RDWR)), mBacklightFd(open("/sys/devices/virtual/panel/brightness/fp_lhbm",O_WRONLY))  {
     mLgeBiometricsFingerprint = ILgeBiometricsFingerprint::getService();
     mLgeBiometricsFingerprint->setHalCallback(this);
 }
@@ -38,8 +38,7 @@ Return<uint64_t> BiometricsFingerprint::setNotify(
 }
 
 Return<uint64_t> BiometricsFingerprint::preEnroll() {
-    setDimlayerHbm(1);
-    setDimlayerHbm(2);
+    setDimlayerHbm(LGE_FP_LHBM_READY);
     return mLgeBiometricsFingerprint->preEnroll();
 }
 
@@ -49,7 +48,7 @@ Return<RequestStatus> BiometricsFingerprint::enroll(const hidl_array<uint8_t, 69
 }
 
 Return<RequestStatus> BiometricsFingerprint::postEnroll() {
-    setDimlayerHbm(0);
+    setDimlayerHbm(LGE_FP_LHBM_EXIT);
     return mLgeBiometricsFingerprint->postEnroll();
 }
 
@@ -58,7 +57,7 @@ Return<uint64_t> BiometricsFingerprint::getAuthenticatorId() {
 }
 
 Return<RequestStatus> BiometricsFingerprint::cancel() {
-    setDimlayerHbm(0);
+    setDimlayerHbm(LGE_FP_LHBM_EXIT);
     return mLgeBiometricsFingerprint->cancel();
 }
 
@@ -76,7 +75,7 @@ Return<RequestStatus> BiometricsFingerprint::setActiveGroup(uint32_t gid,
 }
 
 Return<RequestStatus> BiometricsFingerprint::authenticate(uint64_t operationId, uint32_t gid) {
-    setDimlayerHbm(1);
+    setDimlayerHbm(LGE_FP_LHBM_READY);
     return mLgeBiometricsFingerprint->authenticate(operationId, gid);
 }
 
@@ -85,12 +84,12 @@ Return<bool> BiometricsFingerprint::isUdfps(uint32_t sensorID) {
 }
 
 Return<void> BiometricsFingerprint::onFingerDown(uint32_t x, uint32_t y, float minor, float major) {
-    setFpPress(1);
+    setFpPress(1) && setDimlayerHbm(LGE_FP_LHBM_ON);
     return mLgeBiometricsFingerprint->onFingerDown(x, y, minor, major);
 }
 
 Return<void> BiometricsFingerprint::onFingerUp() {
-    setFpPress(0);
+    setDimlayerHbm(LGE_FP_LHBM_EXIT) && setDimlayerHbm(LGE_FP_LHBM_READY) && setFpPress(0);  //No known to turn off "Finger On" light without exiting Hbm mode. So it exits then immediately goes back into to HBM mode
     return mLgeBiometricsFingerprint->onFingerUp();
 }
 
@@ -109,7 +108,7 @@ Return<void> BiometricsFingerprint::onAuthenticated(uint64_t deviceId, uint32_t 
                                                     uint32_t groupId,
                                                     const hidl_vec<uint8_t>& token) {
     if (fingerId != 0) {
-        setDimlayerHbm(0);
+        setDimlayerHbm(LGE_FP_LHBM_EXIT);
     }
     setFpPress(0);
     return mClientCallback->onAuthenticated(deviceId, fingerId, groupId, token);
@@ -117,7 +116,7 @@ Return<void> BiometricsFingerprint::onAuthenticated(uint64_t deviceId, uint32_t 
 
 Return<void> BiometricsFingerprint::onError(uint64_t deviceId, FingerprintError error,
                                             int32_t vendorCode) {
-    setDimlayerHbm(0);
+    setDimlayerHbm(LGE_FP_LHBM_EXIT);
     setFpPress(0);
     return mClientCallback->onError(deviceId, error, vendorCode);
 }
@@ -132,11 +131,11 @@ Return<void> BiometricsFingerprint::onEnumerate(uint64_t deviceId, uint32_t fing
     return mClientCallback->onEnumerate(deviceId, fingerId, groupId, remaining);
 }
 
-Return<void> BiometricsFingerprint::onAcquired_2_1(uint64_t deviceId,
+Return<void> BiometricsFingerprint::onAcquired_2_2(uint64_t deviceId,
                                                    FingerprintAcquiredInfo acquiredInfo,
                                                    int32_t vendorCode) {
     return reinterpret_cast<V2_2::IBiometricsFingerprintClientCallback*>(mClientCallback.get())
-            ->onAcquired_2_1(deviceId, acquiredInfo, vendorCode);
+            ->onAcquired_2_2(deviceId, acquiredInfo, vendorCode);
 }
 
 Return<void> BiometricsFingerprint::onEngineeringInfoUpdated(
@@ -152,7 +151,7 @@ Return<void> BiometricsFingerprint::onFingerprintCmd(int32_t /*cmdId*/,
 }
 
 }  // namespace implementation
-}  // namespace V2_2
+}  // namespace V2_3
 }  // namespace fingerprint
 }  // namespace biometrics
 }  // namespace hardware
