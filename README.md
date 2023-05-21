@@ -1,0 +1,2 @@
+# biometrics_fingerprint_hidl_timelm
+Prototype HAL that is required by android to be able to bring up the fingerprint HAL for biometric authentification support. Such works by opening the device file that corresponds to the embedded fingerprint scanner and calling the functions that is implemented in another shared library that abstracts the lower level functionalities away from the HAL. Code supports HBM control for optimal print reading as well as error number interpretation
